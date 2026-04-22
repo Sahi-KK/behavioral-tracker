@@ -1,12 +1,5 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, Modal, Pressable, Vibration } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  runOnJS,
-  Easing
-} from 'react-native-reanimated';
+import React, { useState, useRef } from 'react';
+import { View, Text, Modal, Pressable, Vibration, Animated, Easing } from 'react-native';
 
 interface InterventionModalProps {
   isVisible: boolean;
@@ -19,34 +12,43 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
   appName,
   onDismiss,
 }) => {
-  const progress = useSharedValue(0);
+  const progress = useRef(new Animated.Value(0)).current;
   const [isHolding, setIsHolding] = useState(false);
 
   const handlePressIn = () => {
     setIsHolding(true);
-    progress.value = withTiming(1, { 
-      duration: 5000, 
-      easing: Easing.linear 
-    }, (finished) => {
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 5000,
+      easing: Easing.linear,
+      useNativeDriver: false, // width cannot use native driver
+    }).start(({ finished }) => {
       if (finished) {
-        runOnJS(completeDismiss)();
+        completeDismiss();
       }
     });
   };
 
   const handlePressOut = () => {
     setIsHolding(false);
-    progress.value = withTiming(0, { duration: 300 });
+    Animated.timing(progress, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   };
 
   const completeDismiss = () => {
     Vibration.vibrate(100);
     onDismiss();
+    // Reset progress for next time
+    progress.setValue(0);
   };
 
-  const animatedBarStyle = useAnimatedStyle(() => ({
-    width: `${progress.value * 100}%`,
-  }));
+  const barWidth = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent={false}>
@@ -75,14 +77,14 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
           <Pressable
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            className="w-full bg-brutalist-black h-24 justify-center items-center active:bg-brutalist-red border-4 border-brutalist-black"
+            className="w-full bg-brutalist-black h-24 justify-center items-center active:bg-brutalist-red border-4 border-brutalist-black overflow-hidden"
           >
             <Animated.View 
               className="absolute left-0 top-0 bottom-0 bg-brutalist-red"
-              style={animatedBarStyle}
+              style={{ width: barWidth }}
             />
             <Text className="text-brutalist-white text-2xl font-black z-10">
-              {isHolding ? '5.0 SECONDS' : 'I AM CONSCIOUS'}
+              {isHolding ? 'HOLDING...' : 'I AM CONSCIOUS'}
             </Text>
           </Pressable>
           
