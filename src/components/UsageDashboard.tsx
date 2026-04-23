@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { AppUsageInfo } from '../native-bridge/AppUsage';
 
 const HIGH_VALUE_PACKAGES = ['com.amazon.kindle', 'com.audible.application', 'com.duolingo'];
@@ -14,11 +14,13 @@ const TIME_LEAK_PACKAGES = [
 interface UsageDashboardProps {
   usageData: AppUsageInfo[];
   onTriggerIntervention: (appName: string) => void;
+  refreshControl?: React.ReactElement<typeof RefreshControl>;
 }
 
 export const UsageDashboard: React.FC<UsageDashboardProps> = ({ 
   usageData,
-  onTriggerIntervention 
+  onTriggerIntervention,
+  refreshControl,
 }) => {
   const categories = useMemo(() => {
     const highValue = usageData.filter(app => HIGH_VALUE_PACKAGES.includes(app.packageName));
@@ -61,7 +63,10 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({
   );
 
   return (
-    <ScrollView className="flex-1 bg-brutalist-white p-6">
+    <ScrollView
+      style={{ flex: 1, backgroundColor: '#FFFFFF', padding: 24 }}
+      refreshControl={refreshControl}
+    >
       <View className="mb-8 bg-brutalist-black p-4 rotate-[-1deg]">
         <Text className="text-brutalist-white text-4xl font-black italic uppercase">
           Digital Inventory

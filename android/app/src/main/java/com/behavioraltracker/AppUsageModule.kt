@@ -27,7 +27,11 @@ class AppUsageModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
 
         val calendar = Calendar.getInstance()
         val endTime = calendar.timeInMillis
-        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        // Reset to midnight today for accurate daily tracking
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
         val startTime = calendar.timeInMillis
 
         // queryAndAggregateUsageStats provides a map of packageName -> UsageStats
