@@ -1,4 +1,3 @@
-import './global.css';
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, StatusBar, View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
